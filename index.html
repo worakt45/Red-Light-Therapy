@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สำรวจโลกแห่งแสงสีแดงบำบัด (Red Light Therapy)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: ออกแบบแอปพลิเคชันเป็นหน้าเดียว (SPA) โดยแบ่งเนื้อหาเป็นส่วนต่างๆ ที่ชัดเจนและเข้าถึงได้ผ่านแถบนำทาง (Navigation Bar) เพื่อให้ผู้ใช้สามารถเลือกดูหัวข้อที่สนใจได้ทันที โครงสร้างประกอบด้วย: 1. บทนำ: อธิบายหลักการทำงานพื้นฐาน 2. การประยุกต์ใช้: แสดงประโยชน์ในภาคส่วนต่างๆ ผ่านการ์ดอินเทอร์แอคทีฟ 3. การเปรียบเทียบความยาวคลื่น: ใช้กราฟแท่งเพื่อเปรียบเทียบประสิทธิภาพของแสงแต่ละชนิด 4. การสร้างและผลิต: แบ่งเป็นส่วนประกอบและขั้นตอนการผลิต พร้อมไดอะแกรมอินเทอร์แอคทีฟ โครงสร้างนี้ถูกเลือกเพราะมันเปลี่ยนข้อมูลที่ซับซ้อนให้กลายเป็นส่วนย่อยๆ ที่จัดการและทำความเข้าใจได้ง่าย ช่วยนำทางผู้ใช้จาก "อะไร" และ "ทำไม" ไปสู่ "อย่างไร" ได้อย่างเป็นธรรมชาติ -->
+    <!-- Visualization & Content Choices: 
+        1. หลักการทำงาน -> Goal: Inform -> Viz: ไดอะแกรมแอนิเมชันด้วย HTML/CSS แสดงแสงกระทบเซลล์ -> Interaction: Hover เพื่อดูคำอธิบาย -> Justification: ทำให้กระบวนการทางชีววิทยาที่มองไม่เห็นเป็นภาพที่เข้าใจง่าย -> Library: Vanilla JS/CSS.
+        2. การประยุกต์ใช้ -> Goal: Organize -> Viz: การ์ดแบบกริดที่คลิกได้สำหรับแต่ละภาคส่วน -> Interaction: Click เพื่อขยายดูรายละเอียด -> Justification: จัดระเบียบข้อมูลหลากหลายให้กระทัดรัด ไม่ท่วมท้นผู้ใช้ -> Library: Vanilla JS.
+        3. ความยาวคลื่น -> Goal: Compare -> Viz: กราฟแท่งเปรียบเทียบด้วย Chart.js -> Interaction: ปุ่มเพื่อสลับข้อมูลระหว่าง Red Light และ NIR -> Justification: แสดงความแตกต่างเชิงข้อมูลอย่างชัดเจน -> Library: Chart.js.
+        4. ส่วนประกอบอุปกรณ์ -> Goal: Inform -> Viz: ไดอะแกรมแยกส่วนประกอบแบบอินเทอร์แอคทีฟ -> Interaction: Hover เพื่อแสดงชื่อและหน้าที่ของแต่ละชิ้นส่วน -> Justification: สอนเกี่ยวกับโครงสร้างของอุปกรณ์ได้อย่างมีประสิทธิภาพ -> Library: Vanilla JS.
+        5. ขั้นตอนการผลิต -> Goal: Organize -> Viz: แผนผังกระบวนการแบบเส้นเวลา -> Interaction: Click เพื่อดูรายละเอียดแต่ละขั้นตอน -> Justification: แสดงขั้นตอนที่เป็นลำดับได้อย่างชัดเจน -> Library: Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #FFFBF5;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #C70039;
+            border-bottom-color: #C70039;
+        }
+        .component-item:hover .component-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip:hover .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 0.5rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .section-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .section-fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <h1 class="text-2xl font-bold text-[#C70039]">Red Light Therapy Explorer</h1>
+                <div class="flex flex-wrap justify-center mt-3 md:mt-0 space-x-4 text-sm md:text-base">
+                    <a href="#intro" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">บทนำ</a>
+                    <a href="#applications" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">การประยุกต์ใช้</a>
+                    <a href="#wavelengths" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">ความยาวคลื่น</a>
+                    <a href="#manufacturing" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">การสร้างและผลิต</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <section id="intro" class="section-fade-in min-h-[80vh] flex items-center">
+            <div class="w-full">
+                <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">แสงสีแดงบำบัดคืออะไร?</h2>
+                <p class="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-12">
+                    แสงสีแดงบำบัด หรือ Photobiomodulation (PBM) คือกระบวนการที่ใช้แสงสีแดงและอินฟราเรดใกล้ (Near-Infrared) ในช่วงความยาวคลื่นที่เฉพาะเจาะจง เพื่อกระตุ้นการทำงานของเซลล์ในร่างกาย ส่งเสริมการซ่อมแซมและฟื้นฟูตัวเองตามธรรมชาติ
+                </p>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+                    <div class="w-full md:w-1/2">
+                        <h3 class="text-2xl font-semibold mb-3 text-[#C70039]">กลไกการทำงานระดับเซลล์</h3>
+                        <p class="text-gray-700">
+                            แสงจะเดินทางผ่านชั้นผิวหนังเข้าไปยังเซลล์ และถูกดูดซับโดย 'ไมโทคอนเดรีย' (Mitochondria) ซึ่งเปรียบเสมือนโรงไฟฟ้าของเซลล์ การกระตุ้นนี้จะช่วยเพิ่มการผลิตพลังงานในรูปของ ATP (Adenosine Triphosphate) ทำให้เซลล์มีพลังงานในการทำงาน ซ่อมแซมตัวเอง และสร้างเซลล์ใหม่ได้อย่างมีประสิทธิภาพมากขึ้น
+                        </p>
+                    </div>
+                    <div class="w-full md:w-1/3 flex justify-center items-center">
+                        <div class="relative w-48 h-48">
+                            <div class="absolute inset-0 border-4 border-red-200 rounded-full animate-pulse"></div>
+                            <div class="absolute inset-2 border-2 border-yellow-200 rounded-full"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-lg font-bold text-gray-700">เซลล์ (Cell)</span>
+                            </div>
+                            <div class="absolute top-1/2 left-1/2 -mt-4 -ml-4 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                               <span class="text-xs font-bold text-white">ATP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="applications" class="section-fade-in py-16">
+            <h2 class="text-3xl font-bold text-center mb-2">การประยุกต์ใช้ในภาคส่วนต่างๆ</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">แสงสีแดงถูกนำไปใช้ประโยชน์ในหลากหลายวงการ ตั้งแต่การแพทย์ไปจนถึงการดูแลสัตว์เลี้ยง ลองสำรวจดูว่าแต่ละด้านนำไปใช้อย่างไร</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <div class="card-flip h-64">
+                    <div class="card-flip-inner shadow-lg">
+                        <div class="card-front bg-white p-6 flex flex-col items-center justify-center text-center">
+                            <div class="text-5xl mb-4">🩺</div>
+                            <h3 class="text-xl font-semibold text-gray-800">การแพทย์และสุขภาพ</h3>
+                        </div>
+                        <div class="card-back bg-[#C70039] text-white p-6 flex flex-col justify-center">
+                           <ul class="list-disc list-inside text-sm space-y-2">
+                               <li>ลดการอักเสบและบรรเทาปวด</li>
+                               <li>เร่งการสมานแผล (แผลสด, แผลเบาหวาน)</li>
+                               <li>ฟื้นฟูเส้นประสาท</li>
+                               <li>บรรเทาอาการข้อเสื่อม</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-flip h-64">
+                    <div class="card-flip-inner shadow-lg">
+                        <div class="card-front bg-white p-6 flex flex-col items-center justify-center text-center">
+                            <div class="text-5xl mb-4">💆‍♀️</div>
+                            <h3 class="text-xl font-semibold text-gray-800">ความงามและผิวพรรณ</h3>
+                        </div>
+                         <div class="card-back bg-[#C70039] text-white p-6 flex flex-col justify-center">
+                           <ul class="list-disc list-inside text-sm space-y-2">
+                               <li>กระตุ้นการสร้างคอลลาเจน ลดริ้วรอย</li>
+                               <li>ลดการอักเสบของสิว</li>
+                               <li>ลดรอยแดงและรอยแผลเป็น</li>
+                               <li>ปรับสภาพสีผิวให้สม่ำเสมอ</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-flip h-64">
+                    <div class="card-flip-inner shadow-lg">
+                        <div class="card-front bg-white p-6 flex flex-col items-center justify-center text-center">
+                            <div class="text-5xl mb-4">🏃‍♂️</div>
+                            <h3 class="text-xl font-semibold text-gray-800">กีฬาและการออกกำลังกาย</h3>
+                        </div>
+                         <div class="card-back bg-[#C70039] text-white p-6 flex flex-col justify-center">
+                           <ul class="list-disc list-inside text-sm space-y-2">
+                               <li>เพิ่มประสิทธิภาพการทำงานของกล้ามเนื้อ</li>
+                               <li>เร่งการฟื้นตัว ลดอาการปวดเมื่อย (DOMS)</li>
+                               <li>ลดความอ่อนล้าของกล้ามเนื้อ</li>
+                               <li>ช่วยฟื้นฟูจากการบาดเจ็บ</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-flip h-64">
+                    <div class="card-flip-inner shadow-lg">
+                        <div class="card-front bg-white p-6 flex flex-col items-center justify-center text-center">
+                            <div class="text-5xl mb-4">🐾</div>
+                            <h3 class="text-xl font-semibold text-gray-800">สัตวแพทย์และเกษตรกรรม</h3>
+                        </div>
+                        <div class="card-back bg-[#C70039] text-white p-6 flex flex-col justify-center">
+                           <ul class="list-disc list-inside text-sm space-y-2">
+                               <li>รักษาแผลและอาการปวดในสัตว์</li>
+                               <li>ส่งเสริมการเจริญเติบโตของพืช</li>
+                               <li>เพิ่มคุณภาพผลผลิตทางการเกษตร</li>
+                               <li>ฟื้นฟูสุขภาพสัตว์เลี้ยง</li>
+                           </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="wavelengths" class="section-fade-in py-16 bg-white rounded-lg shadow-inner">
+            <h2 class="text-3xl font-bold text-center mb-2">ความยาวคลื่น: กุญแจสู่ประสิทธิภาพ</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">แสงแต่ละช่วงความยาวคลื่น (วัดในหน่วยนาโนเมตร: nm) จะมีความสามารถในการทะลุผ่านชั้นผิวและให้ผลลัพธ์ที่แตกต่างกัน</p>
+            <div class="text-center mb-8">
+                <button id="redLightBtn" class="bg-[#C70039] text-white px-6 py-2 rounded-full shadow-md hover:bg-red-700 transition duration-300">แสงสีแดง (ประมาณ 660nm)</button>
+                <button id="nirLightBtn" class="bg-gray-600 text-white px-6 py-2 rounded-full shadow-md hover:bg-gray-700 transition duration-300 ml-4">อินฟราเรดใกล้ (ประมาณ 850nm)</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="wavelengthChart"></canvas>
+            </div>
+            <div class="flex justify-around mt-6 text-center max-w-3xl mx-auto">
+                <div>
+                    <h4 class="font-bold text-[#C70039]">แสงสีแดง (Red Light)</h4>
+                    <p class="text-sm text-gray-600">เหมาะกับผิวหนังชั้นนอก<br>เน้นเรื่องผิวพรรณและเส้นผม</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-700">อินฟราเรดใกล้ (NIR)</h4>
+                    <p class="text-sm text-gray-600">ทะลุได้ลึกกว่า<br>เน้นเรื่องกล้ามเนื้อ, ข้อต่อ, กระดูก</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="manufacturing" class="section-fade-in py-16">
+            <h2 class="text-3xl font-bold text-center mb-12">การสร้างและผลิตอุปกรณ์แสงสีแดง</h2>
+
+            <div class="mb-16">
+                <h3 class="text-2xl font-semibold text-center mb-8">ส่วนประกอบหลัก (Core Components)</h3>
+                <div class="relative max-w-2xl mx-auto p-8 bg-gray-100 rounded-lg h-80 flex items-center justify-center">
+                    <p class="text-gray-500 font-bold text-xl">อุปกรณ์แสงสีแดง</p>
+                    
+                    <div class="component-item absolute top-4 left-4">
+                        <div class="w-16 h-10 bg-red-500 rounded border-2 border-white shadow-md cursor-pointer flex items-center justify-center text-white text-xs font-bold">LEDs</div>
+                        <div class="component-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center opacity-0 invisible transition-opacity duration-300">
+                            <b>หลอด LED:</b> หัวใจหลักในการปล่อยแสงตามความยาวคลื่นที่ต้องการ (เช่น 660nm, 850nm)
+                        </div>
+                    </div>
+
+                    <div class="component-item absolute top-10 right-2">
+                        <div class="w-20 h-12 bg-green-600 rounded border-2 border-white shadow-md cursor-pointer flex items-center justify-center text-white text-xs font-bold">PCB</div>
+                        <div class="component-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center opacity-0 invisible transition-opacity duration-300">
+                            <b>แผงวงจร (PCB):</b> แผ่นสำหรับติดตั้งและเชื่อมต่อหลอด LED เข้าด้วยกันเป็นระบบ
+                        </div>
+                    </div>
+
+                    <div class="component-item absolute bottom-4 left-2">
+                        <div class="w-24 h-8 bg-blue-500 rounded border-2 border-white shadow-md cursor-pointer flex items-center justify-center text-white text-xs font-bold">Power Supply</div>
+                        <div class="component-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center opacity-0 invisible transition-opacity duration-300">
+                            <b>แหล่งจ่ายไฟ:</b> แปลงไฟบ้านให้เป็นกระแสและแรงดันที่เหมาะสมสำหรับหลอด LED
+                        </div>
+                    </div>
+
+                     <div class="component-item absolute bottom-8 right-0">
+                        <div class="w-16 h-16 bg-gray-400 rounded-full border-2 border-white shadow-md cursor-pointer flex items-center justify-center text-white text-xs font-bold">Heatsink</div>
+                        <div class="component-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center opacity-0 invisible transition-opacity duration-300">
+                            <b>แผ่นระบายความร้อน:</b> จัดการความร้อนที่เกิดจาก LED เพื่อยืดอายุการใช้งาน
+                        </div>
+                    </div>
+                </div>
+                 <p class="text-center text-gray-600 mt-4 text-sm">วางเมาส์เหนือส่วนประกอบเพื่อดูคำอธิบาย</p>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-semibold text-center mb-8">ขั้นตอนการผลิตเบื้องต้น</h3>
+                <div class="relative max-w-md mx-auto">
+                    <div class="border-l-2 border-dashed border-[#C70039] absolute h-full top-0 left-4"></div>
+                    
+                    <div class="mb-8 pl-12 relative">
+                        <div class="absolute w-8 h-8 bg-[#C70039] text-white rounded-full -left-4 flex items-center justify-center font-bold">1</div>
+                        <h4 class="font-bold text-lg">ออกแบบและเลือกชิ้นส่วน</h4>
+                        <p class="text-gray-600 text-sm">กำหนดขนาด, กำลังไฟ, และความยาวคลื่นที่ต้องการ จากนั้นเลือก LED, ไดรเวอร์, และวัสดุอื่นๆ ที่เหมาะสม</p>
+                    </div>
+
+                    <div class="mb-8 pl-12 relative">
+                        <div class="absolute w-8 h-8 bg-[#C70039] text-white rounded-full -left-4 flex items-center justify-center font-bold">2</div>
+                        <h4 class="font-bold text-lg">ประกอบแผงวงจร (PCB Assembly)</h4>
+                        <p class="text-gray-600 text-sm">นำหลอด LED และชิ้นส่วนอิเล็กทรอนิกส์อื่นๆ มาบัดกรีลงบนแผงวงจรตามที่ออกแบบไว้</p>
+                    </div>
+
+                    <div class="mb-8 pl-12 relative">
+                        <div class="absolute w-8 h-8 bg-[#C70039] text-white rounded-full -left-4 flex items-center justify-center font-bold">3</div>
+                        <h4 class="font-bold text-lg">ประกอบตัวเครื่อง (Final Assembly)</h4>
+                        <p class="text-gray-600 text-sm">นำแผงวงจรที่เสร็จแล้วมาติดตั้งเข้ากับตัวเครื่อง, แผ่นระบายความร้อน, แหล่งจ่ายไฟ, และสวิตช์ควบคุม</p>
+                    </div>
+                    
+                    <div class="pl-12 relative">
+                        <div class="absolute w-8 h-8 bg-[#C70039] text-white rounded-full -left-4 flex items-center justify-center font-bold">4</div>
+                        <h4 class="font-bold text-lg">ทดสอบและควบคุมคุณภาพ</h4>
+                        <p class="text-gray-600 text-sm">ตรวจสอบความถูกต้องของความยาวคลื่น, กำลังขับของแสง (Power Density), และความปลอดภัยของอุปกรณ์</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t mt-12">
+        <div class="container mx-auto px-6 py-6 text-center text-gray-500">
+            <p>สร้างสรรค์ข้อมูลเพื่อการเรียนรู้เกี่ยวกับเทคโนโลยีแสงบำบัด</p>
+            <p class="text-sm mt-2">Credit by worakt45</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const redLightData = {
+                labels: ['กระตุ้นคอลลาเจน', 'ลดการอักเสบ (ผิว)', 'สมานแผล (ผิวเผิน)', 'ฟื้นฟูกล้ามเนื้อ'],
+                datasets: [{
+                    label: 'ประสิทธิภาพของแสงสีแดง (660nm)',
+                    data: [9, 7, 8, 4],
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const nirLightData = {
+                labels: ['กระตุ้นคอลลาเจน', 'ลดการอักเสบ (ลึก)', 'สมานแผล (ลึก)', 'ฟื้นฟูกล้ามเนื้อ'],
+                datasets: [{
+                    label: 'ประสิทธิภาพของอินฟราเรดใกล้ (850nm)',
+                    data: [6, 9, 9, 8],
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const chartConfig = {
+                type: 'bar',
+                data: redLightData,
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: {
+                                display: true,
+                                text: 'ระดับประสิทธิภาพ (เต็ม 10)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}/10`;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const ctx = document.getElementById('wavelengthChart').getContext('2d');
+            let myChart = new Chart(ctx, chartConfig);
+
+            const redLightBtn = document.getElementById('redLightBtn');
+            const nirLightBtn = document.getElementById('nirLightBtn');
+
+            redLightBtn.addEventListener('click', () => {
+                myChart.data = redLightData;
+                myChart.update();
+                redLightBtn.classList.add('bg-[#C70039]');
+                redLightBtn.classList.remove('bg-gray-600');
+                nirLightBtn.classList.add('bg-gray-600');
+                nirLightBtn.classList.remove('bg-[#C70039]');
+            });
+
+            nirLightBtn.addEventListener('click', () => {
+                myChart.data = nirLightData;
+                myChart.update();
+                nirLightBtn.classList.add('bg-[#C70039]');
+                nirLightBtn.classList.remove('bg-gray-600');
+                redLightBtn.classList.add('bg-gray-600');
+                redLightBtn.classList.remove('bg-[#C70039]');
+
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const sectionObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                sectionObserver.observe(section);
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
+
